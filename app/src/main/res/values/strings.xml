@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Budapest Car Sharing</string>
+    <string name="title_activity_car_selection">Budapest Car Sharing</string>
+    <string name="my_position">My position</string>
+</resources>
