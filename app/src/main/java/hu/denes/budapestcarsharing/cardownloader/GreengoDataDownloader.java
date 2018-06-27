@@ -18,6 +18,9 @@ import java.util.List;
 import hu.denes.budapestcarsharing.CarInfo;
 
 public class GreengoDataDownloader extends CarDataDownloader {
+
+    public static final String GREEN_GO = "GreenGo";
+
     public GreengoDataDownloader() {
         super("https://www.greengo.hu/divcontent.php?rnd=4235235&funct=callAPI&APIname=getVehicleList&params[P_ICON_SIZE]=48");
     }
@@ -39,7 +42,7 @@ public class GreengoDataDownloader extends CarDataDownloader {
             for(int i = 0; i < cars.length(); ++i) {
                 try {
                     JSONObject car = cars.getJSONObject(i);
-                    result.add(new CarInfo("GreenGo", car.getString("plate_number"),
+                    result.add(new CarInfo(GREEN_GO, car.getString("plate_number"),
                             new LatLng(car.getDouble("gps_lat"), car.getDouble("gps_long")),
                             car.getInt("battery_level")));
                 } catch (JSONException e) {

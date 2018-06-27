@@ -17,12 +17,12 @@ import java.util.List;
 
 import hu.denes.budapestcarsharing.CarInfo;
 
-public class LimoDataDownloader extends CarDataDownloader {
+public class BlinkeeDataDownloader extends CarDataDownloader {
 
-    public static final String MOLLIMO = "Mollimo";
+    public static final String BLINKEE = "Blinkee";
 
-    public LimoDataDownloader() {
-        super("https://www.mollimo.hu/data/cars.js");
+    public BlinkeeDataDownloader() {
+        super("https://blinkee.city/wp-json/api/v1/regions/11/vehicles");
     }
 
     @Override
@@ -38,14 +38,17 @@ public class LimoDataDownloader extends CarDataDownloader {
             while ((line = br.readLine()) != null) {
                 sb.append(line);
             }
-            cars = new JSONArray(sb.toString().substring(14));
+            cars = new JSONObject(sb.toString()).getJSONArray("data");
             for(int i = 0; i < cars.length(); ++i) {
-                JSONObject car = cars.getJSONObject(i);
-                String plate = car.getJSONObject("vehicleDescription").getString("plate");
-                result.add(new CarInfo(MOLLIMO, plate,
-                        new LatLng(car.getJSONObject("location").getJSONObject("position").getDouble("lat"),
-                                car.getJSONObject("location").getJSONObject("position").getDouble("lon")),
-                        car.getJSONObject("status").getInt("energyLevel"), plate.split(" ")[1]));
+                try {
+                    JSONObject car = cars.getJSONObject(i);
+                    result.add(new CarInfo(BLINKEE, car.getString("plate"),
+                            new LatLng(car.getJSONObject("position").getDouble("lat"),
+                                    car.getJSONObject("position").getDouble("lng")),
+                            car.getInt("range")));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();

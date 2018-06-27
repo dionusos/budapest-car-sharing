@@ -9,6 +9,7 @@ import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CyclicBarrier;
 
+import hu.denes.budapestcarsharing.cardownloader.BlinkeeDataDownloader;
 import hu.denes.budapestcarsharing.cardownloader.GreengoDataDownloader;
 import hu.denes.budapestcarsharing.cardownloader.LimoDataDownloader;
 
@@ -24,7 +25,7 @@ public class CarRefreshAsyncTask extends AsyncTask<String, Integer, String> {
     protected String doInBackground(String... strings) {
         adapter.clear();
         final Collection<CarInfo> store = new ConcurrentLinkedQueue<>();
-        final CyclicBarrier barrier = new CyclicBarrier(3);
+        final CyclicBarrier barrier = new CyclicBarrier(4);
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -45,6 +46,21 @@ public class CarRefreshAsyncTask extends AsyncTask<String, Integer, String> {
             public void run() {
                 try {
                     store.addAll(new LimoDataDownloader().download());
+                    barrier.await();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (BrokenBarrierException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    store.addAll(new BlinkeeDataDownloader().download());
                     barrier.await();
                 } catch (IOException e) {
                     e.printStackTrace();

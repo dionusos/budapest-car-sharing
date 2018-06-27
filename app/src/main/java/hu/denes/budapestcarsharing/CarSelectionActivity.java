@@ -11,7 +11,6 @@ import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
 
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.GeoDataClient;
@@ -31,6 +30,10 @@ import com.google.android.gms.location.places.Places;
 import java.util.HashMap;
 import java.util.Map;
 
+import static hu.denes.budapestcarsharing.cardownloader.BlinkeeDataDownloader.BLINKEE;
+import static hu.denes.budapestcarsharing.cardownloader.GreengoDataDownloader.GREEN_GO;
+import static hu.denes.budapestcarsharing.cardownloader.LimoDataDownloader.MOLLIMO;
+
 public class CarSelectionActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener, CarArrayAdapter.CarInfoDatasetChanged {
 
     private static final float DEFAULT_ZOOM = 15.0f;
@@ -43,9 +46,22 @@ public class CarSelectionActivity extends FragmentActivity implements OnMapReady
     private Map<MarkerOptions, String> markerToLink = new HashMap<>();
     private CarArrayAdapter adapter = new CarArrayAdapter();
     private Marker lastSelectedMarker = null;
-    private static final String GREENGO = "com.GreenGo";
-    private static final String MOLLIMO = "com.vulog.carshare.mol";
+    private static final String GREENGO_APP = "com.GreenGo";
+    private static final String MOLLIMO_APP = "com.vulog.carshare.mol";
+    private static final String BLINKEE_APP = "pl.blinkee.mobile";
     private Map<Marker, String> markerToUri = new HashMap<>();
+    private static final Map<String, Float> companyToColor = new HashMap<>();
+    private static final Map<String, String> companyToApp = new HashMap<>();
+    static {
+        companyToColor.put(GREEN_GO, BitmapDescriptorFactory.HUE_GREEN);
+        companyToColor.put(MOLLIMO + "eUp", BitmapDescriptorFactory.HUE_BLUE);
+        companyToColor.put(MOLLIMO + "Up", BitmapDescriptorFactory.HUE_VIOLET);
+        companyToColor.put(BLINKEE, BitmapDescriptorFactory.HUE_AZURE);
+
+        companyToApp.put(GREEN_GO, GREENGO_APP);
+        companyToApp.put(MOLLIMO, MOLLIMO_APP);
+        companyToApp.put(BLINKEE, BLINKEE_APP);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -208,7 +224,17 @@ public class CarSelectionActivity extends FragmentActivity implements OnMapReady
             mMap.addMarker(myPosition);
         }
         for(CarInfo c : adapter.getCars()) {
-            markerToUri.put(mMap.addMarker(new MarkerOptions().position(c.position).title(c.plate + "@" + c.charge + "%").icon(BitmapDescriptorFactory.defaultMarker(("GreenGo".equals(c.company)) ? BitmapDescriptorFactory.HUE_GREEN : BitmapDescriptorFactory.HUE_BLUE))), ("GreenGo".equals(c.company)) ? GREENGO : MOLLIMO);
+            Float companyColor =  companyToColor.get(c.company+c.type);
+            if(companyColor == null) {
+                continue;
+            }
+            markerToUri.put(
+                    mMap.addMarker(new MarkerOptions().position(c.position)
+                            .title(c.plate + "@" + c.charge + "%")
+                            .icon(BitmapDescriptorFactory.defaultMarker(
+                                   companyColor
+                            ))),
+                    companyToApp.get(c.company));
         }
     }
 }
